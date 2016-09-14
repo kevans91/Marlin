@@ -35,38 +35,14 @@
   #endif
 
   /**
-   * Set ENDSTOPPULLUPS for unused endstop switches
-   */
-  #if ENABLED(ENDSTOPPULLUPS)
-    #if ENABLED(USE_XMAX_PLUG)
-      #define ENDSTOPPULLUP_XMAX
-    #endif
-    #if ENABLED(USE_YMAX_PLUG)
-      #define ENDSTOPPULLUP_YMAX
-    #endif
-    #if ENABLED(USE_ZMAX_PLUG)
-      #define ENDSTOPPULLUP_ZMAX
-    #endif
-    #if ENABLED(USE_XMIN_PLUG)
-      #define ENDSTOPPULLUP_XMIN
-    #endif
-    #if ENABLED(USE_YMIN_PLUG)
-      #define ENDSTOPPULLUP_YMIN
-    #endif
-    #if ENABLED(USE_ZMIN_PLUG)
-      #define ENDSTOPPULLUP_ZMIN
-    #endif
-    #if DISABLED(DISABLE_Z_MIN_PROBE_ENDSTOP)
-      #define ENDSTOPPULLUP_ZMIN_PROBE
-    #endif
-  #endif
-
-  /**
-   * Axis lengths
+   * Axis lengths and center
    */
   #define X_MAX_LENGTH (X_MAX_POS - (X_MIN_POS))
   #define Y_MAX_LENGTH (Y_MAX_POS - (Y_MIN_POS))
   #define Z_MAX_LENGTH (Z_MAX_POS - (Z_MIN_POS))
+  #define X_CENTER float((X_MIN_POS + X_MAX_POS) * 0.5)
+  #define Y_CENTER float((Y_MIN_POS + Y_MAX_POS) * 0.5)
+  #define Z_CENTER float((Z_MIN_POS + Z_MAX_POS) * 0.5)
 
   /**
    * CoreXY and CoreXZ
@@ -85,12 +61,16 @@
     #define NORMAL_AXIS X_AXIS
   #endif
 
+  #define IS_SCARA (ENABLED(MORGAN_SCARA) || ENABLED(MAKERARM_SCARA))
+  #define IS_KINEMATIC (ENABLED(DELTA) || IS_SCARA)
+  #define IS_CARTESIAN !IS_KINEMATIC
+
   /**
-   * SCARA
+   * SCARA cannot use SLOWDOWN and requires QUICKHOME
    */
-  #if ENABLED(SCARA)
+  #if IS_SCARA
     #undef SLOWDOWN
-    #define QUICK_HOME //SCARA needs Quickhome
+    #define QUICK_HOME
   #endif
 
   /**
@@ -106,7 +86,7 @@
     #endif
   #else
     #if ENABLED(DELTA)
-      #define X_HOME_POS ((X_MAX_LENGTH) * 0.5)
+      #define X_HOME_POS (X_MIN_POS + (X_MAX_LENGTH) * 0.5)
     #else
       #define X_HOME_POS (X_HOME_DIR < 0 ? X_MIN_POS : X_MAX_POS)
     #endif
@@ -122,7 +102,7 @@
     #endif
   #else
     #if ENABLED(DELTA)
-      #define Y_HOME_POS ((Y_MAX_LENGTH) * 0.5)
+      #define Y_HOME_POS (Y_MIN_POS + (Y_MAX_LENGTH) * 0.5)
     #else
       #define Y_HOME_POS (Y_HOME_DIR < 0 ? Y_MIN_POS : Y_MAX_POS)
     #endif
@@ -154,11 +134,7 @@
    */
   #define HAS_PROBING_PROCEDURE (ENABLED(AUTO_BED_LEVELING_FEATURE) || ENABLED(Z_MIN_PROBE_REPEATABILITY_TEST))
 
-  // Boundaries for probing based on set limits
-  #define MIN_PROBE_X (max(X_MIN_POS, X_MIN_POS + X_PROBE_OFFSET_FROM_EXTRUDER))
-  #define MAX_PROBE_X (min(X_MAX_POS, X_MAX_POS + X_PROBE_OFFSET_FROM_EXTRUDER))
-  #define MIN_PROBE_Y (max(Y_MIN_POS, Y_MIN_POS + Y_PROBE_OFFSET_FROM_EXTRUDER))
-  #define MAX_PROBE_Y (min(Y_MAX_POS, Y_MAX_POS + Y_PROBE_OFFSET_FROM_EXTRUDER))
+  #define HOMING_Z_WITH_PROBE (HAS_BED_PROBE && Z_HOME_DIR < 0 && ENABLED(Z_MIN_PROBE_USES_Z_MIN_ENDSTOP_PIN))
 
   #define HAS_Z_SERVO_ENDSTOP (defined(Z_ENDSTOP_SERVO_NR) && Z_ENDSTOP_SERVO_NR >= 0)
 
@@ -170,10 +146,11 @@
   #endif
 
   /**
-   * DELTA should ignore Z_SAFE_HOMING
+   * DELTA should ignore Z_SAFE_HOMING and SLOWDOWN
    */
   #if ENABLED(DELTA)
     #undef Z_SAFE_HOMING
+    #undef SLOWDOWN
   #endif
 
   /**
@@ -186,6 +163,11 @@
     #ifndef Z_SAFE_HOMING_Y_POINT
       #define Z_SAFE_HOMING_Y_POINT ((Y_MIN_POS + Y_MAX_POS) / 2)
     #endif
+    #define X_TILT_FULCRUM Z_SAFE_HOMING_X_POINT
+    #define Y_TILT_FULCRUM Z_SAFE_HOMING_Y_POINT
+  #else
+    #define X_TILT_FULCRUM X_HOME_POS
+    #define Y_TILT_FULCRUM Y_HOME_POS
   #endif
 
   /**
@@ -363,31 +345,89 @@
     #define _YMAX_ 201
     #define _ZMAX_ 301
     #if Z2_USE_ENDSTOP == _XMAX_
-      #define Z2_MAX_ENDSTOP_INVERTING X_MAX_ENDSTOP_INVERTING
-      #define Z2_MAX_PIN X_MAX_PIN
-      #undef USE_XMAX_PLUG
+      #define USE_XMAX_PLUG
     #elif Z2_USE_ENDSTOP == _YMAX_
-      #define Z2_MAX_ENDSTOP_INVERTING Y_MAX_ENDSTOP_INVERTING
-      #define Z2_MAX_PIN Y_MAX_PIN
-      #undef USE_YMAX_PLUG
+      #define USE_YMAX_PLUG
     #elif Z2_USE_ENDSTOP == _ZMAX_
-      #define Z2_MAX_ENDSTOP_INVERTING Z_MAX_ENDSTOP_INVERTING
-      #define Z2_MAX_PIN Z_MAX_PIN
-      #undef USE_ZMAX_PLUG
+      #define USE_ZMAX_PLUG
     #elif Z2_USE_ENDSTOP == _XMIN_
-      #define Z2_MAX_ENDSTOP_INVERTING X_MIN_ENDSTOP_INVERTING
-      #define Z2_MAX_PIN X_MIN_PIN
-      #undef USE_XMIN_PLUG
+      #define USE_XMIN_PLUG
     #elif Z2_USE_ENDSTOP == _YMIN_
-      #define Z2_MAX_ENDSTOP_INVERTING Y_MIN_ENDSTOP_INVERTING
-      #define Z2_MAX_PIN Y_MIN_PIN
-      #undef USE_YMIN_PLUG
+      #define USE_YMIN_PLUG
     #elif Z2_USE_ENDSTOP == _ZMIN_
-      #define Z2_MAX_ENDSTOP_INVERTING Z_MIN_ENDSTOP_INVERTING
-      #define Z2_MAX_PIN Z_MIN_PIN
-      #undef USE_ZMIN_PLUG
+      #define USE_ZMIN_PLUG
+    #endif
+    #if Z_HOME_DIR > 0
+      #if Z2_USE_ENDSTOP == _XMAX_
+        #define Z2_MAX_ENDSTOP_INVERTING X_MAX_ENDSTOP_INVERTING
+        #define Z2_MAX_PIN X_MAX_PIN
+      #elif Z2_USE_ENDSTOP == _YMAX_
+        #define Z2_MAX_ENDSTOP_INVERTING Y_MAX_ENDSTOP_INVERTING
+        #define Z2_MAX_PIN Y_MAX_PIN
+      #elif Z2_USE_ENDSTOP == _ZMAX_
+        #define Z2_MAX_ENDSTOP_INVERTING Z_MAX_ENDSTOP_INVERTING
+        #define Z2_MAX_PIN Z_MAX_PIN
+      #elif Z2_USE_ENDSTOP == _XMIN_
+        #define Z2_MAX_ENDSTOP_INVERTING X_MIN_ENDSTOP_INVERTING
+        #define Z2_MAX_PIN X_MIN_PIN
+      #elif Z2_USE_ENDSTOP == _YMIN_
+        #define Z2_MAX_ENDSTOP_INVERTING Y_MIN_ENDSTOP_INVERTING
+        #define Z2_MAX_PIN Y_MIN_PIN
+      #elif Z2_USE_ENDSTOP == _ZMIN_
+        #define Z2_MAX_ENDSTOP_INVERTING Z_MIN_ENDSTOP_INVERTING
+        #define Z2_MAX_PIN Z_MIN_PIN
+      #else
+        #define Z2_MAX_ENDSTOP_INVERTING false
+      #endif
     #else
-      #define Z2_MAX_ENDSTOP_INVERTING false
+      #if Z2_USE_ENDSTOP == _XMAX_
+        #define Z2_MIN_ENDSTOP_INVERTING X_MAX_ENDSTOP_INVERTING
+        #define Z2_MIN_PIN X_MAX_PIN
+      #elif Z2_USE_ENDSTOP == _YMAX_
+        #define Z2_MIN_ENDSTOP_INVERTING Y_MAX_ENDSTOP_INVERTING
+        #define Z2_MIN_PIN Y_MAX_PIN
+      #elif Z2_USE_ENDSTOP == _ZMAX_
+        #define Z2_MIN_ENDSTOP_INVERTING Z_MAX_ENDSTOP_INVERTING
+        #define Z2_MIN_PIN Z_MAX_PIN
+      #elif Z2_USE_ENDSTOP == _XMIN_
+        #define Z2_MIN_ENDSTOP_INVERTING X_MIN_ENDSTOP_INVERTING
+        #define Z2_MIN_PIN X_MIN_PIN
+      #elif Z2_USE_ENDSTOP == _YMIN_
+        #define Z2_MIN_ENDSTOP_INVERTING Y_MIN_ENDSTOP_INVERTING
+        #define Z2_MIN_PIN Y_MIN_PIN
+      #elif Z2_USE_ENDSTOP == _ZMIN_
+        #define Z2_MIN_ENDSTOP_INVERTING Z_MIN_ENDSTOP_INVERTING
+        #define Z2_MIN_PIN Z_MIN_PIN
+      #else
+        #define Z2_MIN_ENDSTOP_INVERTING false
+      #endif
+    #endif
+  #endif
+
+  /**
+   * Set ENDSTOPPULLUPS for active endstop switches
+   */
+  #if ENABLED(ENDSTOPPULLUPS)
+    #if ENABLED(USE_XMAX_PLUG)
+      #define ENDSTOPPULLUP_XMAX
+    #endif
+    #if ENABLED(USE_YMAX_PLUG)
+      #define ENDSTOPPULLUP_YMAX
+    #endif
+    #if ENABLED(USE_ZMAX_PLUG)
+      #define ENDSTOPPULLUP_ZMAX
+    #endif
+    #if ENABLED(USE_XMIN_PLUG)
+      #define ENDSTOPPULLUP_XMIN
+    #endif
+    #if ENABLED(USE_YMIN_PLUG)
+      #define ENDSTOPPULLUP_YMIN
+    #endif
+    #if ENABLED(USE_ZMIN_PLUG)
+      #define ENDSTOPPULLUP_ZMIN
+    #endif
+    #if DISABLED(DISABLE_Z_MIN_PROBE_ENDSTOP)
+      #define ENDSTOPPULLUP_ZMIN_PROBE
     #endif
   #endif
 
@@ -408,10 +448,16 @@
   #define HAS_AUTO_FAN_1 (PIN_EXISTS(EXTRUDER_1_AUTO_FAN))
   #define HAS_AUTO_FAN_2 (PIN_EXISTS(EXTRUDER_2_AUTO_FAN))
   #define HAS_AUTO_FAN_3 (PIN_EXISTS(EXTRUDER_3_AUTO_FAN))
+  #define AUTO_1_IS_0 (EXTRUDER_1_AUTO_FAN_PIN == EXTRUDER_0_AUTO_FAN_PIN)
+  #define AUTO_2_IS_0 (EXTRUDER_2_AUTO_FAN_PIN == EXTRUDER_0_AUTO_FAN_PIN)
+  #define AUTO_2_IS_1 (EXTRUDER_2_AUTO_FAN_PIN == EXTRUDER_1_AUTO_FAN_PIN)
+  #define AUTO_3_IS_0 (EXTRUDER_3_AUTO_FAN_PIN == EXTRUDER_0_AUTO_FAN_PIN)
+  #define AUTO_3_IS_1 (EXTRUDER_3_AUTO_FAN_PIN == EXTRUDER_1_AUTO_FAN_PIN)
+  #define AUTO_3_IS_2 (EXTRUDER_3_AUTO_FAN_PIN == EXTRUDER_2_AUTO_FAN_PIN)
   #define HAS_AUTO_FAN (HAS_AUTO_FAN_0 || HAS_AUTO_FAN_1 || HAS_AUTO_FAN_2 || HAS_AUTO_FAN_3)
   #define HAS_FAN0 (PIN_EXISTS(FAN))
-  #define HAS_FAN1 (PIN_EXISTS(FAN1) && CONTROLLERFAN_PIN != FAN1_PIN && EXTRUDER_0_AUTO_FAN_PIN != FAN1_PIN && EXTRUDER_1_AUTO_FAN_PIN != FAN1_PIN && EXTRUDER_2_AUTO_FAN_PIN != FAN1_PIN)
-  #define HAS_FAN2 (PIN_EXISTS(FAN2) && CONTROLLERFAN_PIN != FAN2_PIN && EXTRUDER_0_AUTO_FAN_PIN != FAN2_PIN && EXTRUDER_1_AUTO_FAN_PIN != FAN2_PIN && EXTRUDER_2_AUTO_FAN_PIN != FAN2_PIN)
+  #define HAS_FAN1 (PIN_EXISTS(FAN1) && CONTROLLERFAN_PIN != FAN1_PIN && EXTRUDER_0_AUTO_FAN_PIN != FAN1_PIN && EXTRUDER_1_AUTO_FAN_PIN != FAN1_PIN && EXTRUDER_2_AUTO_FAN_PIN != FAN1_PIN && EXTRUDER_3_AUTO_FAN_PIN != FAN1_PIN)
+  #define HAS_FAN2 (PIN_EXISTS(FAN2) && CONTROLLERFAN_PIN != FAN2_PIN && EXTRUDER_0_AUTO_FAN_PIN != FAN2_PIN && EXTRUDER_1_AUTO_FAN_PIN != FAN2_PIN && EXTRUDER_2_AUTO_FAN_PIN != FAN2_PIN && EXTRUDER_3_AUTO_FAN_PIN != FAN2_PIN)
   #define HAS_CONTROLLERFAN (PIN_EXISTS(CONTROLLERFAN))
   #define HAS_SERVOS (defined(NUM_SERVOS) && NUM_SERVOS > 0)
   #define HAS_SERVO_0 (PIN_EXISTS(SERVO0))
@@ -484,11 +530,11 @@
   #define HAS_THERMALLY_PROTECTED_BED (HAS_TEMP_BED && HAS_HEATER_BED && ENABLED(THERMAL_PROTECTION_BED))
 
   /**
-   * This value is used by M109 when trying to calculate a ballpark safe margin
-   * to prevent wait-forever situation.
+   * This setting is also used by M109 when trying to calculate
+   * a ballpark safe margin to prevent wait-forever situation.
    */
   #ifndef EXTRUDE_MINTEMP
-   #define EXTRUDE_MINTEMP 170
+    #define EXTRUDE_MINTEMP 170
   #endif
 
   /**
@@ -547,8 +593,6 @@
       #define Z_ENDSTOP_SERVO_NR -1
     #endif
   #endif
-
-  #define PROBE_SELECTED (ENABLED(FIX_MOUNTED_PROBE) || ENABLED(Z_PROBE_ALLEN_KEY) || HAS_Z_SERVO_ENDSTOP || ENABLED(Z_PROBE_SLED))
 
   #define PROBE_PIN_CONFIGURED (HAS_Z_MIN_PROBE_PIN || (HAS_Z_MIN && ENABLED(Z_MIN_PROBE_USES_Z_MIN_ENDSTOP_PIN)))
 
@@ -611,17 +655,27 @@
     #ifndef DELTA_DIAGONAL_ROD_TRIM_TOWER_3
       #define DELTA_DIAGONAL_ROD_TRIM_TOWER_3 0.0
     #endif
-    #if ENABLED(AUTO_BED_LEVELING_GRID)
-      #define DELTA_BED_LEVELING_GRID
-    #endif
   #endif
 
   /**
-   * When not using other bed leveling...
+   * Specify the exact style of auto bed leveling
+   *
+   *  3POINT    - 3 Point Probing with the least-squares solution.
+   *  LINEAR    - Grid Probing with the least-squares solution.
+   *  NONLINEAR - Grid Probing with a mesh solution. Best for large beds.
    */
-  #if ENABLED(AUTO_BED_LEVELING_FEATURE) && DISABLED(AUTO_BED_LEVELING_GRID) && DISABLED(DELTA_BED_LEVELING_GRID)
-    #define AUTO_BED_LEVELING_3POINT
+  #if ENABLED(AUTO_BED_LEVELING_FEATURE)
+    #if DISABLED(AUTO_BED_LEVELING_GRID)
+      #define AUTO_BED_LEVELING_LINEAR
+      #define AUTO_BED_LEVELING_3POINT
+    #elif IS_KINEMATIC
+      #define AUTO_BED_LEVELING_NONLINEAR
+    #else
+      #define AUTO_BED_LEVELING_LINEAR
+    #endif
   #endif
+
+  #define PLANNER_LEVELING (ENABLED(MESH_BED_LEVELING) || ENABLED(AUTO_BED_LEVELING_LINEAR))
 
   /**
    * Buzzer/Speaker
@@ -633,14 +687,10 @@
     #ifndef LCD_FEEDBACK_FREQUENCY_DURATION_MS
       #define LCD_FEEDBACK_FREQUENCY_DURATION_MS 100
     #endif
-  #elif PIN_EXISTS(BEEPER)
+  #else
     #ifndef LCD_FEEDBACK_FREQUENCY_HZ
       #define LCD_FEEDBACK_FREQUENCY_HZ 5000
     #endif
-    #ifndef LCD_FEEDBACK_FREQUENCY_DURATION_MS
-      #define LCD_FEEDBACK_FREQUENCY_DURATION_MS 2
-    #endif
-  #else
     #ifndef LCD_FEEDBACK_FREQUENCY_DURATION_MS
       #define LCD_FEEDBACK_FREQUENCY_DURATION_MS 2
     #endif
@@ -658,6 +708,20 @@
   #endif
   #ifndef Z_PROBE_TRAVEL_HEIGHT
     #define Z_PROBE_TRAVEL_HEIGHT Z_HOMING_HEIGHT
+  #endif
+
+  #if IS_KINEMATIC
+    // Check for this in the code instead
+    #define MIN_PROBE_X X_MIN_POS
+    #define MAX_PROBE_X X_MAX_POS
+    #define MIN_PROBE_Y Y_MIN_POS
+    #define MAX_PROBE_Y Y_MAX_POS
+  #else
+    // Boundaries for probing based on set limits
+    #define MIN_PROBE_X (max(X_MIN_POS, X_MIN_POS + X_PROBE_OFFSET_FROM_EXTRUDER))
+    #define MAX_PROBE_X (min(X_MAX_POS, X_MAX_POS + X_PROBE_OFFSET_FROM_EXTRUDER))
+    #define MIN_PROBE_Y (max(Y_MIN_POS, Y_MIN_POS + Y_PROBE_OFFSET_FROM_EXTRUDER))
+    #define MAX_PROBE_Y (min(Y_MAX_POS, Y_MAX_POS + Y_PROBE_OFFSET_FROM_EXTRUDER))
   #endif
 
 #endif // CONDITIONALS_POST_H

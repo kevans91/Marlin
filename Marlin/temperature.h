@@ -121,7 +121,7 @@ class Temperature {
       static millis_t watch_bed_next_ms;
     #endif
 
-    #if ENABLED(PREVENT_DANGEROUS_EXTRUDE)
+    #if ENABLED(PREVENT_COLD_EXTRUSION)
       static bool allow_cold_extrude;
       static float extrude_min_temp;
       static bool tooColdToExtrude(uint8_t e) {
@@ -437,8 +437,8 @@ class Temperature {
     #endif
 
     static void _temp_error(int e, const char* serial_msg, const char* lcd_msg);
-    static void min_temp_error(uint8_t e);
-    static void max_temp_error(uint8_t e);
+    static void min_temp_error(int8_t e);
+    static void max_temp_error(int8_t e);
 
     #if ENABLED(THERMAL_PROTECTION_HOTENDS) || HAS_THERMALLY_PROTECTED_BED
 

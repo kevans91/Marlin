@@ -345,14 +345,16 @@
 
 // @section extruder
 
-//this prevents dangerous Extruder moves, i.e. if the temperature is under the limit
-//can be software-disabled for whatever purposes by
-#define PREVENT_DANGEROUS_EXTRUDE
-//if PREVENT_DANGEROUS_EXTRUDE is on, you can still disable (uncomment) very long bits of extrusion separately.
-#define PREVENT_LENGTHY_EXTRUDE
-
+// This option prevents extrusion if the temperature is below EXTRUDE_MINTEMP.
+// It also enables the M302 command to set the minimum extrusion temperature
+// or to allow moving the extruder regardless of the hotend temperature.
+// *** IT IS HIGHLY RECOMMENDED TO LEAVE THIS OPTION ENABLED! ***
+#define PREVENT_COLD_EXTRUSION
 #define EXTRUDE_MINTEMP 170
-#define EXTRUDE_MAXLENGTH (X_MAX_LENGTH+Y_MAX_LENGTH) //prevent extrusion of very large distances.
+
+// This option prevents a single extrusion longer than EXTRUDE_MAXLENGTH.
+#define PREVENT_LENGTHY_EXTRUDE
+#define EXTRUDE_MAXLENGTH (X_MAX_LENGTH+Y_MAX_LENGTH)
 
 //===========================================================================
 //======================== Thermal Runaway Protection =======================
@@ -468,9 +470,41 @@
 #define Z_MAX_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
 #define Z_MIN_PROBE_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
 
+
+//=============================================================================
+//============================== Movement Settings ============================
+//=============================================================================
+// @section motion
+
+// variables to calculate steps
+#define XYZ_FULL_STEPS_PER_ROTATION 200
+#define XYZ_MICROSTEPS 16
+#define XYZ_BELT_PITCH 2
+#define XYZ_PULLEY_TEETH 16
+
+// delta speeds must be the same on xyz
+#define XYZ_STEPS (XYZ_FULL_STEPS_PER_ROTATION * XYZ_MICROSTEPS / double(XYZ_BELT_PITCH) / double(XYZ_PULLEY_TEETH))
+
+#define DEFAULT_AXIS_STEPS_PER_UNIT   {XYZ_STEPS, XYZ_STEPS, XYZ_STEPS, 158}   // default steps per unit for PowerWasp
+#define DEFAULT_MAX_FEEDRATE          {200, 200, 200, 25}    // (mm/sec)
+#define DEFAULT_MAX_ACCELERATION      {9000,9000,9000,10000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot.
+
+#define DEFAULT_ACCELERATION          2000    // X, Y, Z and E acceleration in mm/s^2 for printing moves
+#define DEFAULT_RETRACT_ACCELERATION  3000    // E acceleration in mm/s^2 for retracts
+#define DEFAULT_TRAVEL_ACCELERATION   3000    // X, Y, Z acceleration in mm/s^2 for travel (non printing) moves
+
+// "Jerk" specifies the minimum speed change that requires acceleration.
+// When changing speed and direction, if the difference is less than the
+// value set here, it may happen instantaneously.
+#define DEFAULT_XYJERK                20.0    // (mm/sec)
+#define DEFAULT_ZJERK                 20.0    // (mm/sec)
+#define DEFAULT_EJERK                 20.0    // (mm/sec)
+
+
 //===========================================================================
 //============================= Z Probe Options =============================
 //===========================================================================
+// @section probes
 
 //
 // Probe Type
@@ -622,10 +656,11 @@
 //#define Z_MIN_PROBE_REPEATABILITY_TEST
 
 //
-// Probe Raise options provide clearance for the probe to deploy, stow, and travel.
+// Minimum heights for the probe to deploy/stow and travel.
+// These values specify the distance from the NOZZLE to the BED.
 //
-#define Z_PROBE_DEPLOY_HEIGHT 20 // Raise to make room for the probe to deploy / stow
-#define Z_PROBE_TRAVEL_HEIGHT 10 // Raise between probing points.
+#define Z_PROBE_DEPLOY_HEIGHT 20 // Z position for the probe to deploy/stow
+#define Z_PROBE_TRAVEL_HEIGHT 10 // Z position for travel between points
 
 //
 // For M851 give a range for adjusting the Z probe offset
@@ -697,7 +732,7 @@
 //========================= Filament Runout Sensor ==========================
 //===========================================================================
 //#define FILAMENT_RUNOUT_SENSOR // Uncomment for defining a filament runout sensor such as a mechanical or opto endstop to check the existence of filament
-                                 // In RAMPS uses servo pin 2. Can be changed in pins file. For other boards pin definition should be made.
+                                 // RAMPS-based boards use SERVO3_PIN. For other boards you may need to define FIL_RUNOUT_PIN.
                                  // It is assumed that when logic high = filament available
                                  //                    when logic  low = filament ran out
 #if ENABLED(FILAMENT_RUNOUT_SENSOR)
@@ -825,35 +860,6 @@
 
 // Delta only homes to Z
 #define HOMING_FEEDRATE_Z  (60*60)
-
-//
-// MOVEMENT SETTINGS
-// @section motion
-//
-
-// variables to calculate steps
-#define XYZ_FULL_STEPS_PER_ROTATION 200
-#define XYZ_MICROSTEPS 16
-#define XYZ_BELT_PITCH 2
-#define XYZ_PULLEY_TEETH 16
-
-// delta speeds must be the same on xyz
-#define XYZ_STEPS (XYZ_FULL_STEPS_PER_ROTATION * XYZ_MICROSTEPS / double(XYZ_BELT_PITCH) / double(XYZ_PULLEY_TEETH))
-
-// default settings
-
-#define DEFAULT_AXIS_STEPS_PER_UNIT   {XYZ_STEPS, XYZ_STEPS, XYZ_STEPS, 158}   // default steps per unit for PowerWasp
-#define DEFAULT_MAX_FEEDRATE          {200, 200, 200, 25}    // (mm/sec)
-#define DEFAULT_MAX_ACCELERATION      {9000,9000,9000,10000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot.
-
-#define DEFAULT_ACCELERATION          2000    // X, Y, Z and E acceleration in mm/s^2 for printing moves
-#define DEFAULT_RETRACT_ACCELERATION  3000    // E acceleration in mm/s^2 for retracts
-#define DEFAULT_TRAVEL_ACCELERATION   3000    // X, Y, Z acceleration in mm/s^2 for travel (non printing) moves
-
-// The speed change that does not require acceleration (i.e. the software might assume it can be done instantaneously)
-#define DEFAULT_XYJERK                20.0    // (mm/sec)
-#define DEFAULT_ZJERK                 20.0    // (mm/sec)
-#define DEFAULT_EJERK                 20.0    // (mm/sec)
 
 
 //=============================================================================

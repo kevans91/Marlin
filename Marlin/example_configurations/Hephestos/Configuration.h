@@ -339,14 +339,16 @@
 
 // @section extruder
 
-//this prevents dangerous Extruder moves, i.e. if the temperature is under the limit
-//can be software-disabled for whatever purposes by
-#define PREVENT_DANGEROUS_EXTRUDE
-//if PREVENT_DANGEROUS_EXTRUDE is on, you can still disable (uncomment) very long bits of extrusion separately.
-#define PREVENT_LENGTHY_EXTRUDE
-
+// This option prevents extrusion if the temperature is below EXTRUDE_MINTEMP.
+// It also enables the M302 command to set the minimum extrusion temperature
+// or to allow moving the extruder regardless of the hotend temperature.
+// *** IT IS HIGHLY RECOMMENDED TO LEAVE THIS OPTION ENABLED! ***
+#define PREVENT_COLD_EXTRUSION
 #define EXTRUDE_MINTEMP 170
-#define EXTRUDE_MAXLENGTH (X_MAX_LENGTH+Y_MAX_LENGTH) //prevent extrusion of very large distances.
+
+// This option prevents a single extrusion longer than EXTRUDE_MAXLENGTH.
+#define PREVENT_LENGTHY_EXTRUDE
+#define EXTRUDE_MAXLENGTH (X_MAX_LENGTH+Y_MAX_LENGTH)
 
 //===========================================================================
 //======================== Thermal Runaway Protection =======================
@@ -420,9 +422,32 @@
 #define Z_MAX_ENDSTOP_INVERTING true  // set to true to invert the logic of the endstop.
 #define Z_MIN_PROBE_ENDSTOP_INVERTING true  // set to true to invert the logic of the endstop.
 
+
+//=============================================================================
+//============================== Movement Settings ============================
+//=============================================================================
+// @section motion
+
+#define DEFAULT_AXIS_STEPS_PER_UNIT   {80,80,4000,100.47095761381482}  // default steps per unit for Ultimaker
+#define DEFAULT_MAX_FEEDRATE          {200, 200, 3.3, 25}    // (mm/sec)
+#define DEFAULT_MAX_ACCELERATION      {1100,1100,100,10000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for Skeinforge 40+, for older versions raise them a lot.
+
+#define DEFAULT_ACCELERATION          650     // X, Y, Z and E acceleration in mm/s^2 for printing moves
+#define DEFAULT_RETRACT_ACCELERATION  1000    // E acceleration in mm/s^2 for retracts
+#define DEFAULT_TRAVEL_ACCELERATION   1000    // X, Y, Z acceleration in mm/s^2 for travel (non printing) moves
+
+// "Jerk" specifies the minimum speed change that requires acceleration.
+// When changing speed and direction, if the difference is less than the
+// value set here, it may happen instantaneously.
+#define DEFAULT_XYJERK                10.0    // (mm/sec)
+#define DEFAULT_ZJERK                  0.4    // (mm/sec)
+#define DEFAULT_EJERK                  5.0    // (mm/sec)
+
+
 //===========================================================================
 //============================= Z Probe Options =============================
 //===========================================================================
+// @section probes
 
 //
 // Probe Type
@@ -515,11 +540,11 @@
 // Setting the wrong pin may have unexpected and potentially disastrous consequences.
 // Use with caution and do your homework.
 //
-//#define Z_MIN_PROBE_ENDSTOP
+#define Z_MIN_PROBE_ENDSTOP
 
 // Enable Z_MIN_PROBE_USES_Z_MIN_ENDSTOP_PIN to use the Z_MIN_PIN for your Z_MIN_PROBE.
 // The Z_MIN_PIN will then be used for both Z-homing and probing.
-#define Z_MIN_PROBE_USES_Z_MIN_ENDSTOP_PIN
+//#define Z_MIN_PROBE_USES_Z_MIN_ENDSTOP_PIN
 
 // To use a probe you must enable one of the two options above!
 
@@ -533,10 +558,11 @@
 //#define Z_MIN_PROBE_REPEATABILITY_TEST
 
 //
-// Probe Raise options provide clearance for the probe to deploy, stow, and travel.
+// Minimum heights for the probe to deploy/stow and travel.
+// These values specify the distance from the NOZZLE to the BED.
 //
-#define Z_PROBE_DEPLOY_HEIGHT 15 // Raise to make room for the probe to deploy / stow
-#define Z_PROBE_TRAVEL_HEIGHT 5  // Raise between probing points.
+#define Z_PROBE_DEPLOY_HEIGHT 15 // Z position for the probe to deploy/stow
+#define Z_PROBE_TRAVEL_HEIGHT  5 // Z position for travel between points
 
 //
 // For M851 give a range for adjusting the Z probe offset
@@ -608,7 +634,7 @@
 //========================= Filament Runout Sensor ==========================
 //===========================================================================
 //#define FILAMENT_RUNOUT_SENSOR // Uncomment for defining a filament runout sensor such as a mechanical or opto endstop to check the existence of filament
-                                 // In RAMPS uses servo pin 2. Can be changed in pins file. For other boards pin definition should be made.
+                                 // RAMPS-based boards use SERVO3_PIN. For other boards you may need to define FIL_RUNOUT_PIN.
                                  // It is assumed that when logic high = filament available
                                  //                    when logic  low = filament ran out
 #if ENABLED(FILAMENT_RUNOUT_SENSOR)
@@ -680,7 +706,7 @@
 
     // Set the number of grid points per dimension.
     // You probably don't need more than 3 (squared=9).
-    #define AUTO_BED_LEVELING_GRID_POINTS 2
+    #define AUTO_BED_LEVELING_GRID_POINTS 3
 
   #else  // !AUTO_BED_LEVELING_GRID
 
@@ -733,26 +759,6 @@
 // Homing speeds (mm/m)
 #define HOMING_FEEDRATE_XY 2000
 #define HOMING_FEEDRATE_Z  150
-
-//
-// MOVEMENT SETTINGS
-// @section motion
-//
-
-// default settings
-
-#define DEFAULT_AXIS_STEPS_PER_UNIT   {80,80,4000,100.47095761381482}  // default steps per unit for Ultimaker
-#define DEFAULT_MAX_FEEDRATE          {250, 250, 3.3, 25}    // (mm/sec)
-#define DEFAULT_MAX_ACCELERATION      {3000,3000,100,10000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for Skeinforge 40+, for older versions raise them a lot.
-
-#define DEFAULT_ACCELERATION          1000    // X, Y, Z and E acceleration in mm/s^2 for printing moves
-#define DEFAULT_RETRACT_ACCELERATION  1000   // E acceleration in mm/s^2 for retracts
-#define DEFAULT_TRAVEL_ACCELERATION   1000    // X, Y, Z acceleration in mm/s^2 for travel (non printing) moves
-
-// The speed change that does not require acceleration (i.e. the software might assume it can be done instantaneously)
-#define DEFAULT_XYJERK                10.0    // (mm/sec)
-#define DEFAULT_ZJERK                 0.4     // (mm/sec)
-#define DEFAULT_EJERK                 5.0    // (mm/sec)
 
 
 //=============================================================================
