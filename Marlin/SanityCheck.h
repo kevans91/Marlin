@@ -91,6 +91,8 @@
   #error "SERVO_ENDSTOP_ANGLES is deprecated. Use Z_SERVO_ANGLES instead."
 #elif defined(X_ENDSTOP_SERVO_NR) || defined(Y_ENDSTOP_SERVO_NR)
   #error "X_ENDSTOP_SERVO_NR and Y_ENDSTOP_SERVO_NR are deprecated and should be removed."
+#elif defined(DEFAULT_XYJERK)
+  #error "DEFAULT_XYJERK is deprecated. Use DEFAULT_XJERK and DEFAULT_YJERK instead."
 #elif defined(XY_TRAVEL_SPEED)
   #error "XY_TRAVEL_SPEED is deprecated. Use XY_PROBE_SPEED instead."
 #elif defined(PROBE_SERVO_DEACTIVATION_DELAY)
@@ -848,6 +850,17 @@
     #error "I2C_SLAVE_ADDRESS can't be less than 8. (Addresses 0 - 7 are reserved.)"
   #elif I2C_SLAVE_ADDRESS > 127
     #error "I2C_SLAVE_ADDRESS can't be over 127. (Only 7 bits allowed.)"
+  #endif
+#endif
+
+/**
+ * G38 Probe Target
+ */
+#if ENABLED(G38_PROBE_TARGET)
+  #if !HAS_BED_PROBE
+    #error "G38_PROBE_TARGET requires a bed probe."
+  #elif !IS_CARTESIAN
+    #error "G38_PROBE_TARGET requires a Cartesian machine."
   #endif
 #endif
 
