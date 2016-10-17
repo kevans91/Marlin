@@ -4,7 +4,7 @@ PROGRAM_CMD=avrdude
 SERIAL_PORT=/dev/cuaU0
 FLASH_FILE="flash.hex"
 PFLAGS="-C/usr/local/etc/avrdude.conf -v -v -v -v \
-	-patmega2560 -cwiring -P${SERIAL_PORT} \
+	-patmega2560 -cwiring -P${SERIAL_PORT} -b115200 -D \
 	-Uflash:w:./${FLASH_FILE}:i"
 
 echo $PFLAGS
