@@ -634,8 +634,8 @@ static bool send_ok[BUFSIZE];
   static inline type pgm_read_any(const type *p)  \
   { return pgm_read_##reader##_near(p); }
 
-DEFINE_PGM_READ_ANY(float,       float);
-DEFINE_PGM_READ_ANY(signed char, byte);
+DEFINE_PGM_READ_ANY(float,       float)
+DEFINE_PGM_READ_ANY(signed char, byte)
 
 #define XYZ_CONSTS_FROM_CONFIG(type, array, CONFIG) \
   static const PROGMEM type array##_P[XYZ] =        \
@@ -643,12 +643,12 @@ DEFINE_PGM_READ_ANY(signed char, byte);
   static inline type array(int axis)          \
   { return pgm_read_any(&array##_P[axis]); }
 
-XYZ_CONSTS_FROM_CONFIG(float, base_min_pos,   MIN_POS);
-XYZ_CONSTS_FROM_CONFIG(float, base_max_pos,   MAX_POS);
-XYZ_CONSTS_FROM_CONFIG(float, base_home_pos,  HOME_POS);
-XYZ_CONSTS_FROM_CONFIG(float, max_length,     MAX_LENGTH);
-XYZ_CONSTS_FROM_CONFIG(float, home_bump_mm,   HOME_BUMP_MM);
-XYZ_CONSTS_FROM_CONFIG(signed char, home_dir, HOME_DIR);
+XYZ_CONSTS_FROM_CONFIG(float, base_min_pos,   MIN_POS)
+XYZ_CONSTS_FROM_CONFIG(float, base_max_pos,   MAX_POS)
+XYZ_CONSTS_FROM_CONFIG(float, base_home_pos,  HOME_POS)
+XYZ_CONSTS_FROM_CONFIG(float, max_length,     MAX_LENGTH)
+XYZ_CONSTS_FROM_CONFIG(float, home_bump_mm,   HOME_BUMP_MM)
+XYZ_CONSTS_FROM_CONFIG(signed char, home_dir, HOME_DIR)
 
 /**
  * ***************************************************************************
@@ -3145,7 +3145,7 @@ inline void gcode_G4() {
       if (DEBUGGING(LEVELING)) DEBUG_POS(">>> home_delta", current_position);
     #endif
     // Init the current position of all carriages to 0,0,0
-    memset(current_position, 0, sizeof(current_position));
+    ZERO(current_position);
     sync_plan_position();
 
     // Move all carriages together linearly until an endstop is hit.
@@ -3623,9 +3623,10 @@ inline void gcode_G28() {
           }
         }
         else {
-          SERIAL_PROTOCOLLNPGM("X not entered.");
+          SERIAL_CHAR('X'); SERIAL_PROTOCOLLNPGM(" not entered.");
           return;
         }
+
         if (code_seen('Y')) {
           py = code_value_int() - 1;
           if (py < 0 || py >= MESH_NUM_Y_POINTS) {
@@ -3634,14 +3635,15 @@ inline void gcode_G28() {
           }
         }
         else {
-          SERIAL_PROTOCOLLNPGM("Y not entered.");
+          SERIAL_CHAR('Y'); SERIAL_PROTOCOLLNPGM(" not entered.");
           return;
         }
+
         if (code_seen('Z')) {
           mbl.z_values[py][px] = code_value_axis_units(Z_AXIS);
         }
         else {
-          SERIAL_PROTOCOLLNPGM("Z not entered.");
+          SERIAL_CHAR('Z'); SERIAL_PROTOCOLLNPGM(" not entered.");
           return;
         }
         break;
@@ -3651,7 +3653,7 @@ inline void gcode_G28() {
           mbl.z_offset = code_value_axis_units(Z_AXIS);
         }
         else {
-          SERIAL_PROTOCOLLNPGM("Z not entered.");
+          SERIAL_CHAR('Z'); SERIAL_PROTOCOLLNPGM(" not entered.");
           return;
         }
         break;
@@ -8540,7 +8542,7 @@ void ok_to_send() {
     cartes[X_AXIS] = delta_tower1_x + ex[0] * Xnew + ey[0] * Ynew - ez[0] * Znew;
     cartes[Y_AXIS] = delta_tower1_y + ex[1] * Xnew + ey[1] * Ynew - ez[1] * Znew;
     cartes[Z_AXIS] =             z1 + ex[2] * Xnew + ey[2] * Ynew - ez[2] * Znew;
-  };
+  }
 
   void forward_kinematics_DELTA(float point[ABC]) {
     forward_kinematics_DELTA(point[A_AXIS], point[B_AXIS], point[C_AXIS]);
@@ -9737,7 +9739,9 @@ void setup() {
       safe_delay(BOOTSCREEN_TIMEOUT);
     #elif ENABLED(ULTRA_LCD)
       bootscreen();
-      lcd_init();
+      #if DISABLED(SDSUPPORT)
+        lcd_init();
+      #endif
     #endif
   #endif
 
