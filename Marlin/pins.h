@@ -39,6 +39,8 @@
   #include "pins_CHEAPTRONIC.h"
 #elif MB(SETHI)
   #include "pins_SETHI.h"
+#elif MB(MIGHTYBOARD_REVE)
+  #include "pins_MIGHTYBOARD_REVE.h"
 #elif MB(RAMPS_OLD)
   #include "pins_RAMPS_OLD.h"
 #elif MB(RAMPS_13_EFB)
@@ -131,6 +133,9 @@
   #include "pins_MEGATRONICS_2.h"
 #elif MB(MEGATRONICS_3)
   #include "pins_MEGATRONICS_3.h"
+#elif MB(MEGATRONICS_31)
+  #define MEGATRONICS_31
+  #include "pins_MEGATRONICS_3.h" 
 #elif MB(OMCA_A)
   #include "pins_OMCA_A.h"
 #elif MB(OMCA)
