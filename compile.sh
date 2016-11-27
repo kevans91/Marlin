@@ -15,6 +15,6 @@ if [ ! -d ${BUILD_PATH} ]; then
 	mkdir -p ${BUILD_PATH}
 fi
 
-arduino-builder -verbose -fqbn arduino:avr:mega:cpu=atmega2560 -build-path ${BUILD_PATH}  -build-options-file ${BUILD_OPTIONS} -libraries /usr/local/arduino/libraries ${SKETCH_PATH}
+arduino-builder -verbose -fqbn arduino:avr:mega:cpu=atmega2560 -build-path ${BUILD_PATH}  -build-options-file ${BUILD_OPTIONS} ${SKETCH_PATH}
 
 mv ${SKETCH_BINARY} ${OUTPUT_BINARY}

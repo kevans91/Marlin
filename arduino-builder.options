@@ -1,0 +1,6 @@
+{
+  "hardwareFolders": "/usr/local/arduino/hardware",
+  "otherLibrariesFolders": "/usr/local/arduino/libraries",
+  "toolsFolders": "/usr/local/arduino/tools-builder",
+  "runtime.ide.version": "10612"
+}
