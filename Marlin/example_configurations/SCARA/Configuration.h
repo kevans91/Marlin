@@ -177,6 +177,9 @@
 // :[1, 2, 3, 4]
 #define EXTRUDERS 1
 
+// Enable if your E steppers or extruder gear ratios are not identical
+//#define DISTINCT_E_FACTORS
+
 // For Cyclops or any "multi-extruder" that shares a single nozzle.
 //#define SINGLENOZZLE
 
@@ -423,9 +426,13 @@
 // @section machine
 
 // Uncomment one of these options to enable CoreXY, CoreXZ, or CoreYZ kinematics
+// either in the usual order or reversed
 //#define COREXY
 //#define COREXZ
 //#define COREYZ
+//#define COREYX
+//#define COREZX
+//#define COREZY
 
 // Enable this option for Toshiba steppers
 //#define CONFIG_STEPPERS_TOSHIBA
@@ -483,26 +490,31 @@
  *
  * These settings can be reset by M502
  *
+ * You can set distinct factors for each E stepper, if needed.
+ * If fewer factors are given, the last will apply to the rest.
+ *
  * Note that if EEPROM is enabled, saved values will override these.
  */
 
 /**
  * Default Axis Steps Per Unit (steps/mm)
  * Override with M92
+ *                                      X, Y, Z, E0 [, E1[, E2[, E3]]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   {103.69,106.65,200/1.25,1000}  // default steps per unit for SCARA
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 103.69, 106.65, 200/1.25, 1000 }  // default steps per unit for SCARA
 
 /**
  * Default Max Feed Rate (mm/s)
  * Override with M203
+ *                                      X, Y, Z, E0 [, E1[, E2[, E3]]]
  */
 #define DEFAULT_MAX_FEEDRATE          { 300, 300, 30, 25 }
 
 /**
  * Default Max Acceleration (change/s) change = mm/s
+ * (Maximum start speed for accelerated moves)
  * Override with M201
- *
- * Maximum start speed for accelerated moves: { X, Y, Z, E }
+ *                                      X, Y, Z, E0 [, E1[, E2[, E3]]]
  */
 #define DEFAULT_MAX_ACCELERATION      { 300, 300, 20, 1000 }
 
@@ -520,6 +532,7 @@
 
 /**
  * Default Jerk (mm/s)
+ * Override with M205 X Y Z E
  *
  * "Jerk" specifies the minimum speed change that requires acceleration.
  * When changing speed and direction, if the difference is less than the
@@ -760,6 +773,11 @@
     #define MBL_Z_STEP 0.025  // Step size while manually probing Z axis.
   #endif  // MANUAL_BED_LEVELING
 
+  // Gradually reduce leveling correction until a set height is reached,
+  // at which point movement will be level to the machine's XY plane.
+  // The height can be set with M420 Z<height>
+  #define ENABLE_LEVELING_FADE_HEIGHT
+
 #endif  // MESH_BED_LEVELING
 
 //===========================================================================
@@ -816,6 +834,25 @@
 
   // Probe along the Y axis, advancing X after each column
   //#define PROBE_Y_FIRST
+
+  #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
+
+    // Gradually reduce leveling correction until a set height is reached,
+    // at which point movement will be level to the machine's XY plane.
+    // The height can be set with M420 Z<height>
+    #define ENABLE_LEVELING_FADE_HEIGHT
+
+    // 
+    // Experimental Subdivision of the grid by Catmull-Rom method.
+    // Synthesizes intermediate points to produce a more detailed mesh.
+    // 
+    //#define ABL_BILINEAR_SUBDIVISION
+    #if ENABLED(ABL_BILINEAR_SUBDIVISION)
+      // Number of subdivisions between probe points
+      #define BILINEAR_SUBDIVISIONS 3
+    #endif
+
+  #endif
 
 #elif ENABLED(AUTO_BED_LEVELING_3POINT)
 
@@ -1036,9 +1073,9 @@
 // Here you may choose the language used by Marlin on the LCD menus, the following
 // list of languages are available:
 //    en, an, bg, ca, cn, cz, de, el, el-gr, es, eu, fi, fr, gl, hr, it,
-//    kana, kana_utf8, nl, pl, pt, pt_utf8, pt-br, pt-br_utf8, ru, tr, test
+//    kana, kana_utf8, nl, pl, pt, pt_utf8, pt-br, pt-br_utf8, ru, tr, uk, test
 //
-// :{ 'en':'English', 'an':'Aragonese', 'bg':'Bulgarian', 'ca':'Catalan', 'cn':'Chinese', 'cz':'Czech', 'de':'German', 'el':'Greek', 'el-gr':'Greek (Greece)', 'es':'Spanish', 'eu':'Basque-Euskera', 'fi':'Finnish', 'fr':'French', 'gl':'Galician', 'hr':'Croatian', 'it':'Italian', 'kana':'Japanese', 'kana_utf8':'Japanese (UTF8)', 'nl':'Dutch', 'pl':'Polish', 'pt':'Portuguese', 'pt-br':'Portuguese (Brazilian)', 'pt-br_utf8':'Portuguese (Brazilian UTF8)', 'pt_utf8':'Portuguese (UTF8)', 'ru':'Russian', 'tr':'Turkish', 'test':'TEST' }
+// :{ 'en':'English', 'an':'Aragonese', 'bg':'Bulgarian', 'ca':'Catalan', 'cn':'Chinese', 'cz':'Czech', 'de':'German', 'el':'Greek', 'el-gr':'Greek (Greece)', 'es':'Spanish', 'eu':'Basque-Euskera', 'fi':'Finnish', 'fr':'French', 'gl':'Galician', 'hr':'Croatian', 'it':'Italian', 'kana':'Japanese', 'kana_utf8':'Japanese (UTF8)', 'nl':'Dutch', 'pl':'Polish', 'pt':'Portuguese', 'pt-br':'Portuguese (Brazilian)', 'pt-br_utf8':'Portuguese (Brazilian UTF8)', 'pt_utf8':'Portuguese (UTF8)', 'ru':'Russian', 'tr':'Turkish', 'uk':'Ukrainian', 'test':'TEST' }
 //
 //#define LCD_LANGUAGE en
 
@@ -1373,6 +1410,14 @@
 
 //define BlinkM/CyzRgb Support
 //#define BLINKM
+
+// Support for an RGB LED using 3 separate pins with optional PWM
+//#define RGB_LED
+#if ENABLED(RGB_LED)
+  #define RGB_LED_R_PIN 34
+  #define RGB_LED_G_PIN 43
+  #define RGB_LED_B_PIN 35
+#endif
 
 /*********************************************************************\
 * R/C SERVO support
