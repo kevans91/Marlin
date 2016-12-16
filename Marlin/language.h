@@ -25,6 +25,8 @@
 
 #include "MarlinConfig.h"
 
+#define _UxGT(a) a
+
 // Define SIMULATE_ROMFONT to see what is seen on the character based display defined in Configuration.h
 //#define SIMULATE_ROMFONT
 
@@ -262,10 +264,10 @@
 #define MSG_N2 " 2"
 #define MSG_N3 " 3"
 #define MSG_N4 " 4"
-#define MSG_E1 " E1"
-#define MSG_E2 " E2"
-#define MSG_E3 " E3"
-#define MSG_E4 " E4"
+#define MSG_E1 "E1"
+#define MSG_E2 "E2"
+#define MSG_E3 "E3"
+#define MSG_E4 "E4"
 #define MSG_MOVE_E1 "1"
 #define MSG_MOVE_E2 "2"
 #define MSG_MOVE_E3 "3"
