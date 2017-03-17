@@ -4,6 +4,7 @@ set -xe
 
 SKETCH_PATH="Marlin/Marlin.ino"
 OUTPUT_BINARY=flash.hex
+OUTPUT_CHECKSUM=flash.hex.sha512
 BUILD_OPTIONS=/usr/local/arduino/arduino-builder.options
 BUILD_PATH=build
 
@@ -18,3 +19,4 @@ fi
 arduino-builder -verbose -fqbn arduino:avr:mega:cpu=atmega2560 -build-path ${BUILD_PATH}  -build-options-file ${BUILD_OPTIONS} ${SKETCH_PATH}
 
 mv ${SKETCH_BINARY} ${OUTPUT_BINARY}
+sha512 -q ${OUTPUT_BINARY} > ${OUTPUT_CHECKSUM}
