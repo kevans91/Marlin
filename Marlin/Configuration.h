@@ -134,7 +134,7 @@
 #endif
 
 // Name displayed in the LCD "Ready" message and Info menu
-//#define CUSTOM_MACHINE_NAME "3D Printer"
+#define CUSTOM_MACHINE_NAME "CECS AWOLF"
 
 // Printer's unique ID, used by some programs to differentiate between machines.
 // Choose your own or use a service like http://www.uuidgenerator.net/version4
@@ -1657,13 +1657,13 @@
 // This option overrides the default number of encoder pulses needed to
 // produce one step. Should be increased for high-resolution encoders.
 //
-//#define ENCODER_PULSES_PER_STEP 4
+#define ENCODER_PULSES_PER_STEP 4
 
 //
 // Use this option to override the number of step signals required to
 // move between next/prev menu items.
 //
-//#define ENCODER_STEPS_PER_MENU_ITEM 1
+#define ENCODER_STEPS_PER_MENU_ITEM 1
 
 /**
  * Encoder Direction Options
@@ -1745,7 +1745,7 @@
 //
 // ULTIMAKER Controller.
 //
-//#define ULTIMAKERCONTROLLER
+#define ULTIMAKERCONTROLLER
 
 //
 // ULTIPANEL as seen on Thingiverse.
@@ -1789,7 +1789,7 @@
 //
 // Generic 16x2, 16x4, 20x2, or 20x4 character-based LCD.
 //
-//#define ULTRA_LCD
+#define ULTRA_LCD
 
 //=============================================================================
 //======================== LCD / Controller Selection =========================
